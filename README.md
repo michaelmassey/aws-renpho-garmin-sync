@@ -36,6 +36,7 @@ graph TD
   * Body Water / Hydration (%)
   * Body Mass Index (BMI)
   * Bone Mass (kg)
+  * Skeletal Muscle Mass (kg)
 
 ---
 
@@ -99,6 +100,15 @@ In case the Renpho Health account has a large number of historical records, we d
 * **Recommended Value:** `100` (for production, regular operation).
 
 This can be updated in the CDK stack ([lib/aws-renpho-garmin-sync-stack.ts](lib/aws-renpho-garmin-sync-stack.ts)) or directly in the AWS Lambda Console under Configuration ──► Environment Variables.
+
+---
+
+## Forcing a Re-sync (Updating Past Records)
+
+If you modify the sync payload (e.g., adding a new body metric) and want to overwrite or update previously synchronized records on Garmin Connect:
+
+1. **Clear the DynamoDB State Table:** Delete all items from the `WeightSync` table. Because the Lambda function only processes measurements that aren't yet listed in the table, emptying the table forces the pipeline to re-sync the entire Renpho history.
+2. **Execute the Sync Lambda:** Manually trigger the Lambda function in the AWS Console to push the updates immediately, or let the daily schedule handle it over time. Garmin Connect will automatically accept the incoming data and overwrite the matching measurements.
 
 ---
 

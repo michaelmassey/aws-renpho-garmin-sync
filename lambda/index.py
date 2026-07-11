@@ -120,6 +120,12 @@ def handler(event, context):
             bmi = float(entry['bmi']) if entry.get('bmi') else None
             bone_mass = float(entry['bone']) if entry.get('bone') else None
 
+            # Calculate absolute voluntary Skeletal Muscle Mass in kg to match Garmin's specification
+            if entry.get('muscle'):
+                muscle_mass = weight_kg * (float(entry['muscle']) / 100.0)
+            else:
+                muscle_mass = None
+
             # Convert datetime to ISO-8601 string format (e.g. YYYY-MM-DDTHH:MM:SS) expected by Garmin
             iso_timestamp = measurement_dt.isoformat()
 
@@ -130,7 +136,8 @@ def handler(event, context):
                     percent_fat=percent_fat,
                     percent_hydration=percent_water,
                     bmi=bmi,
-                    bone_mass=bone_mass
+                    bone_mass=bone_mass,
+                    muscle_mass=muscle_mass
                 )
                 
                 # Lock state row-by-row instantly
