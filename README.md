@@ -1,6 +1,6 @@
 # AWS Renpho-Garmin Sync
 
-An automated, serverless daily sync tool that pulls personal weight and body composition measurements from your Renpho smart scale and synchronizes them directly with your Garmin Connect account.
+An AWS cloud-based serverless app and automated daily sync tool that pulls personal weight and body composition measurements from your Renpho smart scale and synchronizes them directly with your Garmin Connect account.
 
 Built using the **AWS Cloud Development Kit (CDK)** in TypeScript, this project deploys an AWS Lambda Python function scheduled to run once per day, backed by a DynamoDB state table to prevent duplicate uploads.
 
@@ -10,7 +10,7 @@ Built using the **AWS Cloud Development Kit (CDK)** in TypeScript, this project 
 
 ```mermaid
 graph TD
-    EB[EventBridge Cron Schedule <br/> 00:00 UTC daily] -->|Triggers| LF[Lambda: PythonFunction]
+    EB[EventBridge Scheduler <br/> Every 24 hours] -->|Triggers| LF[Lambda: PythonFunction]
     LF -->|Fetches decrypted credentials| SSM[(SSM Parameter Store <br/> /renpho-garmin-sync/*)]
     LF -->|Fetches body measurements| Renpho[Renpho Health API]
     LF -->|Checks synced record cache| DDB[(DynamoDB State Table)]
@@ -21,7 +21,7 @@ graph TD
 ### Key Components
 1. **AWS Lambda (Python 3.11):** Executes the sync logic using the unofficial `renpho-api` and `python-garminconnect` Python clients.
 2. **Amazon DynamoDB:** Stores previously synchronized record IDs from Renpho to prevent duplicate uploads to Garmin Connect.
-3. **Amazon EventBridge:** Triggers the Lambda function daily (configured at `00:00 UTC`).
+3. **Amazon EventBridge Scheduler:** Triggers the Lambda function every 24 hours.
 4. **AWS Systems Manager (SSM) Parameter Store:** Encrypts and securely stores your Renpho and Garmin credentials using `SecureString` parameters.
 
 ---
@@ -90,7 +90,30 @@ npx cdk deploy
 
 ---
 
-## Customization & Batching
+## Customization (Sync Schedule & Batching)
+
+### Changing the Sync Schedule
+
+By default, the sync is scheduled to run every 24 hours. You can customize this schedule in the CDK stack file: [lib/aws-renpho-garmin-sync-stack.ts](lib/aws-renpho-garmin-sync-stack.ts).
+
+1. Locate the EventBridge Scheduler definition:
+   ```typescript
+   // EventBridge Schedule running every 24 hours
+   new scheduler.Schedule(this, 'Every24HoursSchedule', {
+     schedule: scheduler.ScheduleExpression.rate(cdk.Duration.hours(24)),
+     target: new schedulerTargets.LambdaInvoke(syncFunction),
+   });
+   ```
+2. Modify the `schedule` property using either `scheduler.ScheduleExpression.rate()` or `scheduler.ScheduleExpression.cron()`. For example:
+   * **Every 12 hours:** `scheduler.ScheduleExpression.rate(cdk.Duration.hours(12))`
+   * **Every day at 8:00 AM UTC (cron):** `scheduler.ScheduleExpression.cron({ minute: '0', hour: '8' })`
+   * **Every hour:** `scheduler.ScheduleExpression.rate(cdk.Duration.hours(1))`
+3. Deploy the changes:
+   ```bash
+   npx cdk deploy
+   ```
+
+### Batching & Rate Limits
 
 The application manages rate limits and Lambda timeouts using the `BATCH_LIMIT` environment variable. 
 

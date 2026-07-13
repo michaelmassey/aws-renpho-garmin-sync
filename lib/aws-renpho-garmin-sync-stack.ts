@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as events from 'aws-cdk-lib/aws-events';
-import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as scheduler from 'aws-cdk-lib/aws-scheduler';
+import * as schedulerTargets from 'aws-cdk-lib/aws-scheduler-targets';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
@@ -54,12 +54,11 @@ export class AwsRenphoGarminSyncStack extends cdk.Stack {
       param.grantRead(syncFunction);
     }
 
-    // 4. EventBridge Cron Schedule to run the Lambda once per day (00:00 UTC)
-    const dailyRule = new events.Rule(this, 'DailySyncRule', {
-      schedule: events.Schedule.cron({ minute: '0', hour: '0' }),
+    // EventBridge Schedule running every 24 hours
+    new scheduler.Schedule(this, 'Every24HoursSchedule', {
+      schedule: scheduler.ScheduleExpression.rate(cdk.Duration.hours(24)),
+      target: new schedulerTargets.LambdaInvoke(syncFunction),
     });
-
-    dailyRule.addTarget(new targets.LambdaFunction(syncFunction));
   }
 }
 
