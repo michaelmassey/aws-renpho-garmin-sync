@@ -1,8 +1,8 @@
 # AWS Renpho-Garmin Sync
 
-An AWS cloud-based serverless app and automated daily sync tool that pulls personal weight and body composition measurements from your Renpho smart scale and synchronizes them directly with your Garmin Connect account.
+An AWS cloud-based serverless app and automated daily sync tool that pulls personal weight and body composition measurements from your Renpho Health smart scale and synchronizes them directly with your Garmin Connect account.
 
-Built using the **AWS Cloud Development Kit (CDK)** in TypeScript, this project deploys an AWS Lambda Python function scheduled to run once per day, backed by a DynamoDB state table to prevent duplicate uploads.
+Built using the **AWS Cloud Development Kit (CDK)** in TypeScript, this project deploys an AWS Lambda Python function scheduled to run once per day, backed by a DynamoDB state table to prevent duplicate measurement uploads.
 
 ---
 
