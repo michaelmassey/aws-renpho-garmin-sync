@@ -4,7 +4,17 @@ An AWS cloud-based serverless app and automated daily sync tool that pulls perso
 
 Built using the **AWS Cloud Development Kit (CDK)** in TypeScript, this project deploys an AWS Lambda Python function scheduled to run once per day, backed by a DynamoDB state table to prevent duplicate measurement uploads.
 
----
+### 💡 Why this project?
+When trying to sync my Renpho scale data to Garmin Connect, the solutions I found:
+1. Required monthly or yearly paid subscriptions.
+2. Had manual CLI scripts that you have to run on your local machine.
+3. Required complicated chaining of middleman apps to get the data to Garmin.
+4. Limited data syncing to select metrics or only weight.
+
+This project provides a **100% free, self-hosted, fully automated, and secure** serverless alternative that runs entirely on the AWS Free Tier.
+
+
+
 
 ## Architecture Overview
 
